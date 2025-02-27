@@ -139,7 +139,7 @@
     }
     
     // Fetch aggregated report data from the backend and update the page
-    fetch('http://localhost:3978/api/reportdata?nocache=' + new Date().getTime())
+    fetch('http://localhost:3978/api/checkin_report?nocache=' + new Date().getTime())
       .then(response => response.json())
       .then(data => {
         // Update Volume Chart with check-in volumes from backend
