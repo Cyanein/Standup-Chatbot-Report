@@ -8,25 +8,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* General styling */
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-    }
-    header {
-      background: #007bff;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2em;
-    }
-    header p {
-      margin: 5px 0 0;
-      font-size: 1.2em;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f0f2f5; }
+    header { background: #007bff; color: white; padding: 20px; text-align: center; }
+    header h1 { margin: 0; font-size: 2em; }
+    header p { margin: 5px 0 0; font-size: 1.2em; }
     .header-content {
       display: flex;
       justify-content: space-between;
@@ -35,9 +20,7 @@
       padding: 15px 20px;
       border-bottom: 1px solid #ccc;
     }
-    .left-panel, .right-panel {
-      width: 48%;
-    }
+    .left-panel, .right-panel { width: 48%; }
     .left-panel { text-align: left; }
     .right-panel { text-align: right; }
     .chart-container {
@@ -48,47 +31,19 @@
     }
     /* Button & table for missed user details */
     .toggle-btn {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      margin-top: 10px; padding: 10px 20px; background: #28a745; color: white;
+      border: none; border-radius: 5px; cursor: pointer;
     }
     .details-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      display: none;
+      width: 100%; border-collapse: collapse; margin-top: 10px; display: none;
     }
-    .details-table th, .details-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-    .details-table th {
-      background-color: #f2f2f2;
-      text-align: left;
-    }
+    .details-table th, .details-table td { border: 1px solid #ddd; padding: 8px; }
+    .details-table th { background-color: #f2f2f2; text-align: left; }
     /* Accordion styling for detailed reports */
-    .accordion {
-      margin: 20px;
-    }
-    .accordion-item {
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      margin-bottom: 10px;
-      background: #fff;
-    }
-    .accordion-header {
-      background: #eee;
-      padding: 10px;
-      cursor: pointer;
-    }
-    .accordion-content {
-      padding: 10px;
-      display: none;
-    }
+    .accordion { margin: 20px; }
+    .accordion-item { border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; background: #fff; }
+    .accordion-header { background: #eee; padding: 10px; cursor: pointer; }
+    .accordion-content { padding: 10px; display: none; }
   </style>
 </head>
 <body>
@@ -105,21 +60,16 @@
       <!-- Details shown in a table -->
       <table class="details-table" id="missedTable">
         <thead>
-          <tr>
-            <th>Username</th>
-          </tr>
+          <tr><th>Username</th></tr>
         </thead>
         <tbody id="missedTableBody">
-          <tr><td>userA</td></tr>
-          <tr><td>userB</td></tr>
-          <tr><td>userC</td></tr>
+          <!-- Content dynamically populated -->
         </tbody>
       </table>
     </div>
-    <!-- Right: Volume Chart showing both Check‑In & Check‑Out -->
+    <!-- Right: Volume Chart -->
     <div class="right-panel">
       <div class="chart-container">
-        <!-- The size of this chart is controlled by .chart-container (width: 1000px; height: 1000px) -->
         <canvas id="volumeChart"></canvas>
       </div>
     </div>
@@ -129,108 +79,113 @@
   <div style="margin: 20px;">
     <button class="toggle-btn" onclick="toggleAccordionSection()">Show Detailed Check‑In Reports</button>
     <div id="detailedReports" style="display:none;">
-      <!-- Detailed Reports using accordion style -->
-      <div class="accordion">
-        <!-- Accordion item for User 1 -->
-        <div class="accordion-item">
-          <div class="accordion-header" onclick="toggleAccordion(this)">User: user1</div>
-          <div class="accordion-content">
-            <h3>Check In Details</h3>
-            <ul>
-              <li><strong>Question:</strong> What did you work on yesterday?</li>
-              <li><strong>Answer:</strong> Fixed bugs in the authentication module.</li>
-              <li><strong>Time:</strong> 9:00 AM</li>
-            </ul>
-            <h3>Check Out Details</h3>
-            <ul>
-              <li><strong>Question:</strong> What are your plans for today?</li>
-              <li><strong>Answer:</strong> Starting new feature development.</li>
-              <li><strong>Time:</strong> 5:00 PM</li>
-            </ul>
-          </div>
-        </div>
-        <!-- Accordion item for User 2 -->
-        <div class="accordion-item">
-          <div class="accordion-header" onclick="toggleAccordion(this)">User: user2</div>
-          <div class="accordion-content">
-            <h3>Check In Details</h3>
-            <ul>
-              <li><strong>Question:</strong> What did you work on yesterday?</li>
-              <li><strong>Answer:</strong> Updated UI components.</li>
-              <li><strong>Time:</strong> 9:15 AM</li>
-            </ul>
-            <h3>Check Out Details</h3>
-            <ul>
-              <li><strong>Question:</strong> What are your plans for today?</li>
-              <li><strong>Answer:</strong> Refining code and bug fixes.</li>
-              <li><strong>Time:</strong> 5:30 PM</li>
-            </ul>
-          </div>
-        </div>
-        <!-- Additional accordion items can be added similarly -->
-      </div>
+      <div class="accordion"></div>
     </div>
   </div>
   
   <script>
-    // Set current date in header
+    // Set current date in DD/MM/YYYY format
     const today = new Date();
-    const formattedDate = 
-    String(today.getDate()).padStart(2, '0') + '/' + 
-    String(today.getMonth() + 1).padStart(2, '0') + '/' + 
-    today.getFullYear();
+    const formattedDate = String(today.getDate()).padStart(2, '0') + '/' +
+                          String(today.getMonth() + 1).padStart(2, '0') + '/' +
+                          today.getFullYear();
     document.getElementById("date").innerText = formattedDate;
     
-    // Render the Volume Chart (both Check‑In and Check‑Out)
+    // Initialize the Volume Chart with placeholder data
     const volumeCtx = document.getElementById('volumeChart').getContext('2d');
-    new Chart(volumeCtx, {
+    const volumeChart = new Chart(volumeCtx, {
       type: 'bar',
       data: {
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-        datasets: [
-          {
-            label: 'Check‑In Volume',
-            data: [10, 15, 12, 18, 20],
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-          },
-          {
-            label: 'Check‑Out Volume',
-            data: [8, 12, 14, 11, 9],
-            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1
-          }
-        ]
+        datasets: [{
+          label: 'Check‑In Volume',
+          data: [10, 15, 12, 18, 20],
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        },
+        {
+          label: 'Check‑Out Volume',
+          data: [8, 12, 14, 11, 9],
+          backgroundColor: 'rgba(255, 99, 132, 0.6)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1
+        }]
       },
       options: {
         indexAxis: 'x',
         responsive: true,
         maintainAspectRatio: false,
-        // If you want to force an aspect ratio instead, you can set maintainAspectRatio to true and use:
-        // aspectRatio: 0.75, // This would give a 3:4 ratio (width / height)
         scales: { x: { beginAtZero: true, max: 100 } }
       }
     });
     
-    // Toggle the display of the missed user table
+    // Toggle function for missed users table
     function toggleTable(id) {
       const table = document.getElementById(id);
       table.style.display = (table.style.display === 'table') ? 'none' : 'table';
     }
     
-    // Toggle the display of the detailed reports section
+    // Toggle function for accordion items
+    function toggleAccordion(element) {
+      const content = element.nextElementSibling;
+      content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+    }
+    
+    // Toggle function for entire detailed reports section
     function toggleAccordionSection() {
       const section = document.getElementById('detailedReports');
       section.style.display = (section.style.display === 'block') ? 'none' : 'block';
     }
     
-    // Toggle each accordion item's content
-    function toggleAccordion(element) {
-      const content = element.nextElementSibling;
-      content.style.display = (content.style.display === 'block') ? 'none' : 'block';
-    }
+    // Fetch aggregated report data from the backend and update the page
+    fetch('http://localhost:3978/api/reportdata?nocache=' + new Date().getTime())
+      .then(response => response.json())
+      .then(data => {
+        // Update Volume Chart with check-in volumes from backend
+        volumeChart.data.datasets[0].data = data.checkInVolumes;
+        volumeChart.update();
+        
+        // Update missed check-in table
+        document.getElementById('missedCount').innerText = data.missedCheckinUsers.length;
+        const tbody = document.getElementById('missedTableBody');
+        tbody.innerHTML = "";
+        data.missedCheckinUsers.forEach(user => {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.innerText = user.username;
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        });
+        
+        // Build detailed reports accordion (for check-in details)
+        const accordionDiv = document.querySelector('#detailedReports .accordion');
+        accordionDiv.innerHTML = "";
+        data.detailedReports.forEach(report => {
+          if(report.checkIn) { // Only include users with check-in details
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'accordion-item';
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'accordion-header';
+            headerDiv.innerText = 'User: ' + report.username;
+            headerDiv.onclick = () => toggleAccordion(headerDiv);
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'accordion-content';
+            contentDiv.innerHTML = `
+              <h3>Check In Details</h3>
+              <ul>
+                <li><strong>Question:</strong> ${report.checkIn.question}</li>
+                <li><strong>Answer:</strong> ${report.checkIn.answer}</li>
+                <li><strong>Time:</strong> ${report.checkIn.time}</li>
+              </ul>
+            `;
+            itemDiv.appendChild(headerDiv);
+            itemDiv.appendChild(contentDiv);
+            accordionDiv.appendChild(itemDiv);
+          }
+        });
+      })
+      .catch(error => console.error('Error fetching report data:', error));
   </script>
 </body>
 </html>
