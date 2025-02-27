@@ -149,7 +149,7 @@
         .then(response => response.json())
         .then(data => {
           volumeChart.data.labels = data.dayLabels;
-          volumeChart.data.datasets[0].data = data.checkOutVolumes;
+          volumeChart.data.datasets[0].data = data.checkInVolumes;
           volumeChart.update();
 
           // Update missed check-in users
