@@ -55,7 +55,7 @@
     <!-- Left: Missed Check‑In Summary -->
     <div class="left-panel">
       <h2>Missed Check‑Ins</h2>
-      <p>Total Missed: <span id="missedCount">3</span></p>
+      <p>Total Missed: <span id="missedCount">Loading...</span></p>
       <button class="toggle-btn" onclick="toggleTable('missedTable')">Show Details</button>
       <!-- Details shown in a table -->
       <table class="details-table" id="missedTable">
@@ -63,7 +63,7 @@
           <tr><th>Username</th></tr>
         </thead>
         <tbody id="missedTableBody">
-          <!-- Content dynamically populated -->
+          <!-- Dynamically populated -->
         </tbody>
       </table>
     </div>
@@ -91,7 +91,7 @@
                           today.getFullYear();
     document.getElementById("date").innerText = formattedDate;
     
-    // Initialize the Volume Chart with placeholder data
+    // Initialize the Volume Chart
     const volumeCtx = document.getElementById('volumeChart').getContext('2d');
     const volumeChart = new Chart(volumeCtx, {
       type: 'bar',
@@ -99,16 +99,9 @@
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
         datasets: [{
           label: 'Check‑In Volume',
-          data: [10, 15, 12, 18, 20],
+          data: [], // Updated dynamically
           backgroundColor: 'rgba(54, 162, 235, 0.6)',
           borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1
-        },
-        {
-          label: 'Check‑Out Volume',
-          data: [8, 12, 14, 11, 9],
-          backgroundColor: 'rgba(255, 99, 132, 0.6)',
-          borderColor: 'rgba(255, 99, 132, 1)',
           borderWidth: 1
         }]
       },
@@ -116,10 +109,10 @@
         indexAxis: 'x',
         responsive: true,
         maintainAspectRatio: false,
-        scales: { x: { beginAtZero: true, max: 100 } }
+        scales: { x: { beginAtZero: true } }
       }
     });
-    
+
     // Toggle function for missed users table
     function toggleTable(id) {
       const table = document.getElementById(id);
@@ -138,54 +131,60 @@
       section.style.display = (section.style.display === 'block') ? 'none' : 'block';
     }
     
-    // Fetch aggregated report data from the backend and update the page
+    // Fetch check-in report data and update UI
     fetch('http://localhost:3978/api/checkin_report?nocache=' + new Date().getTime())
       .then(response => response.json())
       .then(data => {
-        // Update Volume Chart with check-in volumes from backend
+        // Update volume chart
         volumeChart.data.datasets[0].data = data.checkInVolumes;
         volumeChart.update();
-        
-        // Update missed check-in table
+
+        // Update missed check-in users
         document.getElementById('missedCount').innerText = data.missedCheckinUsers.length;
         const tbody = document.getElementById('missedTableBody');
         tbody.innerHTML = "";
         data.missedCheckinUsers.forEach(user => {
           const tr = document.createElement('tr');
-          const td = document.createElement('td');
-          td.innerText = user.username;
-          tr.appendChild(td);
+          tr.innerHTML = `<td>${user.username}</td>`;
           tbody.appendChild(tr);
         });
-        
-        // Build detailed reports accordion (for check-in details)
+
+        // Build detailed check-in reports accordion
         const accordionDiv = document.querySelector('#detailedReports .accordion');
         accordionDiv.innerHTML = "";
         data.detailedReports.forEach(report => {
-          if(report.checkIn) { // Only include users with check-in details
+          if (report.checkIn.length > 0) {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'accordion-item';
             const headerDiv = document.createElement('div');
             headerDiv.className = 'accordion-header';
-            headerDiv.innerText = 'User: ' + report.username;
+            headerDiv.innerText = `User: ${report.username}`;
             headerDiv.onclick = () => toggleAccordion(headerDiv);
+
             const contentDiv = document.createElement('div');
             contentDiv.className = 'accordion-content';
-            contentDiv.innerHTML = `
-              <h3>Check In Details</h3>
-              <ul>
-                <li><strong>Question:</strong> ${report.checkIn.question}</li>
-                <li><strong>Answer:</strong> ${report.checkIn.answer}</li>
-                <li><strong>Time:</strong> ${report.checkIn.time}</li>
-              </ul>
-            `;
+            let reportHTML = '<h3>Check-In Details</h3><ul>';
+            report.checkIn.forEach(entry => {
+              reportHTML += `
+                <li><strong>Question:</strong> ${entry.question}</li>
+                <li><strong>Answer:</strong> ${entry.answer}</li>
+                <li><strong>Time:</strong> ${entry.time}</li>
+                <hr>
+              `;
+            });
+            reportHTML += '</ul>';
+            contentDiv.innerHTML = reportHTML;
+
             itemDiv.appendChild(headerDiv);
             itemDiv.appendChild(contentDiv);
             accordionDiv.appendChild(itemDiv);
           }
         });
       })
-      .catch(error => console.error('Error fetching report data:', error));
+      .catch(error => {
+        console.error('Error fetching check-in data:', error);
+        document.getElementById('missedCount').innerText = "Error";
+      });
   </script>
 </body>
 </html>
