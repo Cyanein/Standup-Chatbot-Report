@@ -51,6 +51,14 @@
     <h1>Check‑In Report</h1>
     <p id="date"></p>
   </header>
+
+  <!-- Date Picker Section -->
+  <div style="margin: 20px;">
+    <label for="reportDate">Select Date:</label>
+    <input type="date" id="reportDate" value="" />
+    <button class="toggle-btn" onclick="loadReport()">Load Report</button>
+  </div>
+
   <div class="header-content">
     <!-- Left: Missed Check‑In Summary -->
     <div class="left-panel">
@@ -84,12 +92,15 @@
   </div>
   
   <script>
-    // Set current date in DD/MM/YYYY format
+    // Set current date in header (DD/MM/YYYY)
     const today = new Date();
     const formattedDate = String(today.getDate()).padStart(2, '0') + '/' +
                           String(today.getMonth() + 1).padStart(2, '0') + '/' +
                           today.getFullYear();
     document.getElementById("date").innerText = formattedDate;
+    
+    // Set default date value for the date picker (today in ISO format)
+    document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
     
     // Initialize the Volume Chart
     const volumeCtx = document.getElementById('volumeChart').getContext('2d');
@@ -131,60 +142,66 @@
       section.style.display = (section.style.display === 'block') ? 'none' : 'block';
     }
     
-    // Fetch check-in report data and update UI
-    fetch('http://localhost:3978/api/checkin_report?nocache=' + new Date().getTime())
-      .then(response => response.json())
-      .then(data => {
-        // Update volume chart
-        volumeChart.data.datasets[0].data = data.checkInVolumes;
-        volumeChart.update();
+    // Function to load report based on selected date
+    function loadReport() {
+      const reportDate = document.getElementById('reportDate').value;
+      fetch('http://localhost:3978/api/checkin_report?date=' + reportDate + '&nocache=' + new Date().getTime())
+        .then(response => response.json())
+        .then(data => {
+          // Update volume chart
+          volumeChart.data.datasets[0].data = data.checkInVolumes;
+          volumeChart.update();
 
-        // Update missed check-in users
-        document.getElementById('missedCount').innerText = data.missedCheckinUsers.length;
-        const tbody = document.getElementById('missedTableBody');
-        tbody.innerHTML = "";
-        data.missedCheckinUsers.forEach(user => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${user.username}</td>`;
-          tbody.appendChild(tr);
+          // Update missed check-in users
+          document.getElementById('missedCount').innerText = data.missedCheckinUsers.length;
+          const tbody = document.getElementById('missedTableBody');
+          tbody.innerHTML = "";
+          data.missedCheckinUsers.forEach(user => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${user.username}</td>`;
+            tbody.appendChild(tr);
+          });
+
+          // Build detailed check-in reports accordion
+          const accordionDiv = document.querySelector('#detailedReports .accordion');
+          accordionDiv.innerHTML = "";
+          data.detailedReports.forEach(report => {
+            if (report.checkIn.length > 0) {
+              const itemDiv = document.createElement('div');
+              itemDiv.className = 'accordion-item';
+              const headerDiv = document.createElement('div');
+              headerDiv.className = 'accordion-header';
+              headerDiv.innerText = `User: ${report.username}`;
+              headerDiv.onclick = () => toggleAccordion(headerDiv);
+
+              const contentDiv = document.createElement('div');
+              contentDiv.className = 'accordion-content';
+              let reportHTML = '<h3>Check‑In Details</h3><ul>';
+              report.checkIn.forEach(entry => {
+                reportHTML += `
+                  <li><strong>Question:</strong> ${entry.question}</li>
+                  <li><strong>Answer:</strong> ${entry.answer}</li>
+                  <li><strong>Time:</strong> ${entry.time}</li>
+                  <hr>
+                `;
+              });
+              reportHTML += '</ul>';
+              contentDiv.innerHTML = reportHTML;
+
+              itemDiv.appendChild(headerDiv);
+              itemDiv.appendChild(contentDiv);
+              accordionDiv.appendChild(itemDiv);
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching check‑in data:', error);
+          document.getElementById('missedCount').innerText = "Error";
         });
+    }
 
-        // Build detailed check-in reports accordion
-        const accordionDiv = document.querySelector('#detailedReports .accordion');
-        accordionDiv.innerHTML = "";
-        data.detailedReports.forEach(report => {
-          if (report.checkIn.length > 0) {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'accordion-item';
-            const headerDiv = document.createElement('div');
-            headerDiv.className = 'accordion-header';
-            headerDiv.innerText = `User: ${report.username}`;
-            headerDiv.onclick = () => toggleAccordion(headerDiv);
-
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'accordion-content';
-            let reportHTML = '<h3>Check-In Details</h3><ul>';
-            report.checkIn.forEach(entry => {
-              reportHTML += `
-                <li><strong>Question:</strong> ${entry.question}</li>
-                <li><strong>Answer:</strong> ${entry.answer}</li>
-                <li><strong>Time:</strong> ${entry.time}</li>
-                <hr>
-              `;
-            });
-            reportHTML += '</ul>';
-            contentDiv.innerHTML = reportHTML;
-
-            itemDiv.appendChild(headerDiv);
-            itemDiv.appendChild(contentDiv);
-            accordionDiv.appendChild(itemDiv);
-          }
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching check-in data:', error);
-        document.getElementById('missedCount').innerText = "Error";
-      });
+    // Optionally, call loadReport() on page load to fetch today's report:
+    loadReport();
   </script>
 </body>
 </html>
