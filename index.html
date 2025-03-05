@@ -42,7 +42,10 @@
     /* Accordion styling for detailed reports */
     .accordion { margin: 20px; }
     .accordion-item { border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; background: #fff; }
-    .accordion-header { background: #eee; padding: 10px; cursor: pointer; }
+    .accordion-header { 
+      background: #eee; padding: 10px; cursor: pointer; overflow: hidden;
+    }
+    .accordion-header span { display: inline-block; vertical-align: middle; }
     .accordion-content { padding: 10px; display: none; }
   </style>
 </head>
@@ -162,7 +165,7 @@
             tbody.appendChild(tr);
           });
 
-          // Build detailed check-in reports accordion
+          // Build detailed check-in reports accordion with AI summary next to username
           const accordionDiv = document.querySelector('#detailedReports .accordion');
           accordionDiv.innerHTML = "";
           data.detailedReports.forEach(report => {
@@ -171,7 +174,10 @@
               itemDiv.className = 'accordion-item';
               const headerDiv = document.createElement('div');
               headerDiv.className = 'accordion-header';
-              headerDiv.innerText = `User: ${report.username}`;
+              headerDiv.innerHTML = `
+                <span style="float: left; font-weight: bold;">User: ${report.username}</span>
+                <span style="float: right; font-weight: normal; color: #555;">${report.summary}</span>
+              `;
               headerDiv.onclick = () => toggleAccordion(headerDiv);
 
               const contentDiv = document.createElement('div');
